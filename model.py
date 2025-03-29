@@ -144,7 +144,10 @@ def show_image_with_labels(image, labels):
 
 
 def main():
+    torch.cuda.empty_cache()
     EPOCHS = 100
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_dataset = CustomDataset(TRAINING_DATA_DIR)
     test_dataset = CustomDataset(TESTING_DATA_DIR)
@@ -167,7 +170,7 @@ def main():
 
     sample = train_dataset[0]
 
-    """
+    
     sam_checkpoint = "sam_vit_h_4b8939.pth"
     model_type = "vit_h"
 
@@ -185,10 +188,11 @@ def main():
     masks, scores, logits = mask_predictor.predict(
         box=sample[0],
         multimask_output=True
-    )"
+    )
+    
     """
-
-    sam_model = SAM("sam_b.pt")
+    #sam_model = SAM("sam_b.pt")
+    SAM.to(self=sam_model, device=device)
 
     # Display model information (optional)
     sam_model.info()
@@ -214,6 +218,7 @@ def main():
         train_dataloaders=train_dataloader,
         val_dataloaders=valid_dataloader,
     )
+    """
 
 
 

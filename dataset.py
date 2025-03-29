@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 import os
 import json
+import torchvision.transforms as T
 
 TRAINING_DATA_DIR = 'dataset/train'
 TESTING_DATA_DIR = "dataset/test"
@@ -24,13 +25,16 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.image_ids)
 
+"""
     def __getitem__(self, idx):
+        print("test 0")
         img_id = self.image_ids[idx]['id']
         img_path = os.path.join(self.data_dir, self.data_info['images'][idx]['file_name'])
         image = Image.open(img_path).convert('RGB')
-        
+        print("test 1")
         # Get annotations for the current image
         annotations = [ann for ann in self.data_info['annotations'] if ann['image_id'] == img_id]
+        print(annotations)
         boxes = [ann['bbox'] for ann in annotations]
         labels = [ann['category_id'] for ann in annotations]
 
@@ -43,4 +47,26 @@ class CustomDataset(Dataset):
         
         target = {"boxes": boxes, "labels": labels}
 
-        return image, target, img_path
+        return image, target"
+"""
+
+def __getitem__(self, idx):
+    # Open image
+
+    print("test 0")
+    img_id = self.image_ids[idx]['id']
+    img_path = os.path.join(self.data_dir, self.data_info['images'][idx]['file_name'])
+    image = Image.open(img_path).convert('RGB')
+
+    # Convert image to tensor
+    print("test 1")
+    transform = T.ToTensor()  # Ensures image is a PyTorch tensor
+    Timage = image.to_tensor()
+
+    # Get annotations (unchanged)
+    annotations = [ann for ann in self.data_info['annotations'] if ann['image_id'] == img_id]
+    boxes = torch.as_tensor([ann['bbox'] for ann in annotations], dtype=torch.float32) if annotations else torch.zeros((0, 4), dtype=torch.float32)
+    labels = torch.as_tensor([ann['category_id'] for ann in annotations], dtype=torch.int64) if annotations else torch.zeros((0,), dtype=torch.int64)
+
+    target = {"boxes": boxes, "labels": labels}
+    return Timage, target
